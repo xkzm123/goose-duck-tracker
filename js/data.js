@@ -36,8 +36,9 @@ const ROLES = [
   { name: '超能力者', faction: 'duck',    initials: 'cnlz', aliases: ['超能力', '超能'] },
   { name: '鸭子',     faction: 'duck',    initials: 'yz'   },
   { name: '小丑',     faction: 'duck',    initials: 'xc'   },
+  { name: '投毒者',   faction: 'duck',    initials: 'tdz',  aliases: ['投毒', '毒'] },
 
-  // 🕊️ 中立阵营 (7)
+  // 🕊️ 中立阵营 (8)
   { name: '呆呆鸟',   faction: 'neutral', initials: 'ddn'  },
   { name: '秃鹫',     faction: 'neutral', initials: 'tj',   aliases: ['秃就', '图就', '秃旧', '图鹫', '秃', '突就', '突鹫', '脱'] },
   { name: '鸽子',     faction: 'neutral', initials: 'gz'   },
@@ -46,6 +47,7 @@ const ROLES = [
   { name: '布谷鸟',   faction: 'neutral', initials: 'bgn'  },
   { name: '锦鸡',     faction: 'neutral', initials: 'jj',   aliases: ['近鸡', '金鸡', '紧鸡', '劲鸡', '锦基', '近基', '金基', '紧急', '紧', '锦'], disabled: true },
   { name: '渡鸦',     faction: 'neutral', initials: 'dy',   aliases: ['渡'] },
+  { name: '喜鹊',     faction: 'neutral', initials: 'xq',   aliases: ['喜', '喜雀'] },
 ];
 
 const FACTION_META = {
@@ -458,6 +460,12 @@ const JINANG_DB = [
   { id: 162, type: 'role', role: '渡鸦',     text: '前期低调观察，记住谁在带节奏、谁在滑水——你的胜利条件独立于双方阵营，信息就是你最大的筹码。' },
   { id: 163, type: 'role', role: '渡鸦',     text: '两边都不要站死，谁强帮谁的对手——保持局势平衡才能拖到你的胜利条件达成。' },
   { id: 164, type: 'role', role: '渡鸦',     text: '被怀疑时不要急着自证，模糊回答反而更安全——中立身份一旦暴露，鹅鸭都会想先处理你。' },
+  { id: 165, type: 'role', role: '喜鹊',     text: '中立别站死某一边——谁势头太猛就帮另一方拖一拖，局面越胶着，你越有机会把私货做完。' },
+  { id: 166, type: 'role', role: '喜鹊',     text: '任务阶段多蹭人堆、少单走，会议里少抢话头；像呆呆鸟那样硬装狼，反而容易提前被抬走。' },
+  { id: 167, type: 'role', role: '喜鹊',     text: '每轮记清谁死了、谁在尸体附近出过声——你的胜利往往吃信息，比硬冲刀口更有用。' },
+  { id: 168, type: 'role', role: '投毒者',   text: '优先对单走、少目击的目标下手，毒发有延迟——你早就不在场了，时间线最难锁到你头上。' },
+  { id: 169, type: 'role', role: '投毒者',   text: '会议快开或人群要汇合前再补毒，让死亡落在“大家挤在一起”的时段，好人更难盘最后接触链。' },
+  { id: 170, type: 'role', role: '投毒者',   text: '别在同一小团体里连续毒杀，法医和通灵会按坑位排人；换地图区域、换社交圈再动手。' },
 
   // ── 混沌戏剧性锦囊（30条）──
   { id: 128, type: 'chaos', text: '在会议开始的第一秒，抢先说："先别说话，我数三秒，大家同时报出最怀疑的人。三——二——一——"不给任何人反应时间。' },
