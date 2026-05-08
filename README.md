@@ -9,7 +9,7 @@
   &nbsp;·&nbsp;
   <a href="https://github.com/luvlua0808-png/goose-duck-tracker/archive/refs/heads/main.zip">下载 ZIP</a>
   &nbsp;·&nbsp;
-  <a href="docs/index.html">本地宣传页（图文）</a>
+  <a href="https://luvlua0808-png.github.io/goose-duck-tracker/">宣传页（图文）</a>
 </p>
 
 ---
@@ -23,7 +23,7 @@
 | 离线可用 | 下载到本地后，核心记牌不依赖服务器 |
 | 语音 / AI | 可选：按住空格说话、硅基流动 DeepSeek 推理（Key 仅存本地） |
 
-仓库内还带有一份独立的 **产品介绍页**：[`docs/index.html`](docs/index.html)（含界面截图与步骤说明）。克隆仓库后，用浏览器直接打开该文件即可浏览；其中资源路径相对于 `docs/` 目录。
+另有图文 **[宣传页](https://luvlua0808-png.github.io/goose-duck-tracker/)**（[GitHub Pages](https://pages.github.com/)，发布自仓库 `docs/`）。若 404：打开仓库 **Settings → Pages**，Source 选 **Deploy from a branch**、`main`、Folder **`/docs`**，保存后等几分钟。克隆到本地也可直接打开 `docs/index.html`。
 
 ---
 
@@ -76,7 +76,7 @@ python server.py
 4. 开始一局：配置人数与地图 → **开始游戏** → 游戏中可配合语音/地图记录 → **进入会议** 整理信息。  
 5. **AI（可选）**：点击 **AI 设置**，填入硅基流动 API Key 并保存；在会议阶段使用 AI 相关按钮即可。
 
-更图文并茂的步骤说明见 **[docs/index.html](docs/index.html)** 中的「如何使用」一节。
+更图文并茂的步骤说明见 **[宣传页](https://luvlua0808-png.github.io/goose-duck-tracker/)** 中的「如何使用」一节。
 
 ---
 
