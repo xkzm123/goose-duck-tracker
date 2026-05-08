@@ -114,6 +114,65 @@ const App = (() => {
     cancelBtn.addEventListener('click',  handleCancel);
   }
 
+  /**
+   * 微信小程序 web-view 内赞赏页跳转：
+   * - 在加载 web-view 的 URL 上增加查询参数，例如 ?tip=%2Fpages%2Freward%2Findex
+   * - 或在宿主小程序注入脚本：window.__GOOSE_TIP_MINIPROGRAM_PATH__ = '/pages/reward/index'
+   */
+  function _getTipMiniProgramPath() {
+    if (typeof window.__GOOSE_TIP_MINIPROGRAM_PATH__ === 'string') {
+      const p = window.__GOOSE_TIP_MINIPROGRAM_PATH__.trim();
+      if (p) return p.startsWith('/') ? p : `/${p}`;
+    }
+    try {
+      const raw = new URLSearchParams(window.location.search).get('tip');
+      if (!raw) return '';
+      const decoded = decodeURIComponent(raw.trim());
+      return decoded.startsWith('/') ? decoded : `/${decoded}`;
+    } catch {
+      return '';
+    }
+  }
+
+  function _bindTip() {
+    const btn = document.getElementById('btn-tip');
+    const modal = document.getElementById('modal-tip');
+    const closeBtn = document.getElementById('modal-tip-close');
+    if (!btn || !modal || !closeBtn) return;
+
+    const tryNavigateToTipPage = () => {
+      const path = _getTipMiniProgramPath();
+      const wxmp = typeof wx !== 'undefined' && wx.miniProgram;
+      if (!path || !wxmp || typeof wxmp.navigateTo !== 'function') return false;
+      wxmp.navigateTo({ url: path });
+      return true;
+    };
+
+    const qrImg = document.getElementById('tip-qr-img');
+    const qrMissing = document.getElementById('modal-tip-qr-missing');
+    if (qrImg && qrMissing) {
+      qrImg.addEventListener('error', () => {
+        qrImg.classList.add('hidden');
+        qrMissing.classList.remove('hidden');
+      });
+      qrImg.addEventListener('load', () => {
+        qrImg.classList.remove('hidden');
+        qrMissing.classList.add('hidden');
+      });
+    }
+
+    btn.addEventListener('click', () => {
+      if (tryNavigateToTipPage()) return;
+      modal.classList.remove('hidden');
+    });
+
+    const close = () => modal.classList.add('hidden');
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) close();
+    });
+  }
+
   function _bindDrawerToggle() {
     const btn = document.getElementById('btn-drawer-toggle');
     const body = document.querySelector('.drawer-body');
@@ -177,6 +236,7 @@ const App = (() => {
     _bindResetRound();
     _bindDrawerToggle();
     _bindMobileMeetingTabs();
+    _bindTip();
 
     // 恢复上次阶段
     const savedPhase = State.get().phase;

@@ -34,6 +34,9 @@
       <button class="btn btn-secondary" id="btn-reset-round" title="重置当前轮次路径" style="display:none">↺ 重置本轮</button>
       <button class="btn btn-danger" id="btn-end-game" title="结束本局并导出" style="display:none">⏹ 结束本局</button>
       <button class="btn btn-secondary" id="btn-ai-settings" title="AI 设置">⚙️ AI设置</button>
+      <button type="button" class="btn btn-secondary btn-tip-header" id="btn-tip" title="如果这个工具帮到你了，请我喝杯奶茶">
+        <span class="btn-tip-icon" aria-hidden="true">🧋</span><span class="btn-tip-label">打赏</span>
+      </button>
     </div>
   </header>
 
@@ -307,6 +310,23 @@
       <div class="modal-actions">
         <button class="btn btn-secondary" id="ai-settings-cancel">取消</button>
         <button class="btn btn-primary" id="ai-settings-save">保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 弹窗：赞赏 / 请我喝杯奶茶 ===== -->
+  <div id="modal-tip" class="modal-overlay hidden">
+    <div class="modal-box modal-tip-box">
+      <h3 class="modal-tip-title">请我喝杯奶茶 🧋</h3>
+      <div class="modal-tip-qr-wrap">
+        <img id="tip-qr-img" class="modal-tip-qr" src="images/wechat-receive-qr.png" alt="微信收款码" decoding="async" />
+        <p id="modal-tip-qr-missing" class="modal-tip-qr-missing hidden">未找到收款码图片：请将 PNG 放到 <code class="modal-tip-code">images/wechat-receive-qr.png</code></p>
+      </div>
+      <p class="modal-tip-note">
+        要是这个小工具顺手帮到你，随缘请我喝杯奶茶就好——心意我会拿去续一点算力，接着捣鼓下一件顺手的小东西。
+      </p>
+      <div class="modal-actions modal-tip-actions">
+        <button class="btn btn-primary" id="modal-tip-close">知道了</button>
       </div>
     </div>
   </div>

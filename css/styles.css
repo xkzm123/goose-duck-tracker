@@ -820,6 +820,86 @@ body {
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
+/* ── 顶栏：奶茶打赏（紧邻 AI 设置） ── */
+.btn-tip-header {
+  border-color: rgba(212, 165, 116, 0.45);
+  background: rgba(212, 165, 116, 0.1);
+  color: rgba(245, 220, 190, 0.95);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  gap: 4px;
+}
+.btn-tip-header:hover {
+  background: rgba(212, 165, 116, 0.18);
+  border-color: rgba(212, 165, 116, 0.65);
+  color: #fff8ef;
+}
+.btn-tip-header .btn-tip-icon { font-size: 1.05rem; line-height: 1; }
+.btn-tip-header .btn-tip-label { font-weight: 600; letter-spacing: 0.02em; }
+
+/* ── 赞赏弹窗（大图收款码） ── */
+.modal-box.modal-tip-box {
+  min-width: 0;
+  width: min(96vw, 520px);
+  max-width: min(96vw, 520px);
+  padding: 14px 16px;
+  gap: 10px;
+  max-height: min(92dvh, 900px);
+}
+.modal-tip-title {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+.modal-tip-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  padding: 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.modal-tip-qr {
+  display: block;
+  width: min(100%, 400px);
+  max-width: 100%;
+  height: auto;
+  max-height: min(52vh, 420px);
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+.modal-tip-qr.hidden { display: none !important; }
+.modal-tip-note {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  text-align: center;
+}
+.modal-tip-qr-missing {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+  margin: 12px 0;
+  max-width: 100%;
+}
+.modal-tip-qr-missing.hidden { display: none !important; }
+.modal-tip-code {
+  font-size: 0.78rem;
+  padding: 2px 6px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  color: var(--accent-blue);
+}
+.modal-tip-actions { margin-top: 2px; padding-top: 0; }
+
 /* ── AI 设置按钮 ── */
 #btn-ai-settings {
   font-size: 0.78rem; padding: 4px 10px;
@@ -1183,6 +1263,7 @@ body {
   .header-right { gap: 4px; }
   #btn-reset-round { display: none !important; }
   #btn-ai-settings { font-size: 0.7rem; padding: 2px 6px; }
+  #btn-tip.btn-tip-header { font-size: 0.7rem; padding: 2px 6px; }
   #btn-end-game    { font-size: 0.7rem; padding: 2px 6px; }
 
   /* ── 阶段一：初始化 ── */
@@ -1433,6 +1514,16 @@ body {
   /* ── 弹窗 ── */
   .modal-box { padding: 10px 12px; min-width: 0; width: 90vw; max-width: 420px; gap: 6px;
     max-height: 85dvh; overflow-y: auto; }
+  .modal-box.modal-tip-box {
+    width: min(96vw, 520px);
+    max-width: min(96vw, 520px);
+    padding: 10px 12px;
+    gap: 8px;
+    max-height: min(92dvh, 900px);
+  }
+  .modal-tip-title { font-size: 0.88rem; }
+  .modal-tip-qr { max-height: min(48vh, 400px); }
+  .modal-tip-note { font-size: 0.78rem; }
   .modal-box h3 { font-size: 0.88rem; }
   .modal-box p  { font-size: 0.78rem; }
   /* AI 设置弹窗特别压缩 */
