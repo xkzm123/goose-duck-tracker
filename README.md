@@ -3,7 +3,9 @@
 专为《鹅鸭杀》（Goose Goose Duck）设计的**纯前端**辅助记牌工具：在浏览器里完成初始化、地图路径、会议信息整理，可选 **语音输入** 与 **AI 推理**。数据保存在本机，无需安装客户端。
 
 <p align="center">
-  <a href="https://goose-duck-tracker.netlify.app"><strong>在线试玩</strong></a>
+  <a href="https://luvlua.cn/"><strong>在线使用 · luvlua.cn</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://goose-duck-tracker.netlify.app" title="域名或解析异常时使用">Netlify 备用</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/luvlua0808-png/goose-duck-tracker/archive/refs/heads/main.zip">下载 ZIP</a>
   &nbsp;·&nbsp;
@@ -54,7 +56,9 @@
 
 ### 在线使用
 
-直接打开：**[https://goose-duck-tracker.netlify.app](https://goose-duck-tracker.netlify.app)**
+优先使用品牌域名：**[https://luvlua.cn/](https://luvlua.cn/)**
+
+备用（与主站内容一致，托管在 Netlify）：[https://goose-duck-tracker.netlify.app](https://goose-duck-tracker.netlify.app)
 
 ### 本地使用（离线）
 
@@ -78,7 +82,7 @@ python server.py
 
 ## 技术与隐私
 
-- **技术栈**：原生 HTML / CSS / JavaScript，无构建步骤；通过 Netlify 等平台可直接发布根目录（见 `netlify.toml`）。
+- **技术栈**：原生 HTML / CSS / JavaScript，无构建步骤；线上主域 **luvlua.cn**，并可通过 Netlify 等平台发布根目录（见 `netlify.toml`）；备用域名为 `goose-duck-tracker.netlify.app`。
 - **数据**：游戏状态保存在浏览器本地（如 `localStorage`），不上传至作者服务器。  
 - **统计**：页面可能包含第三方访问统计脚本（见 `index.html`），用途为访问量分析；若不希望在自建部署中启用，可自行删除对应 `<script>` 标签。
 
@@ -99,7 +103,7 @@ python server.py
 ## 声明与提示
 
 - 本工具为 **非官方** 第三方辅助，与《鹅鸭杀》官方无关；请遵守游戏与平台规则，理性使用。  
-- 国内访问 GitHub 若不稳定，可优先使用上文 **在线试玩** 或 **ZIP 下载**；工具主体在下载后可离线使用。
+- 国内访问 GitHub 若不稳定，可优先使用上文 **luvlua.cn 在线地址**（或 Netlify 备用）与 **ZIP 下载**；工具主体在下载后可离线使用。
 
 ---
 
