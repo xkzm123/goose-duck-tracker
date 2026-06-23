@@ -6,6 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 鹅鸭杀记牌助手 — 专为《鹅鸭杀》（Goose Goose Duck）设计的纯前端辅助记牌工具。无框架、无构建步骤，原生 HTML/CSS/JS 静态页面。所有游戏数据保存在浏览器 localStorage，不上传服务器。
 
+## Git 提交规范
+
+- **所有 commit message 必须使用中文**。
+- 格式：`<type>: <简短描述>`，type 可选 `feat` / `fix` / `docs` / `style` / `refactor`。
+- 正文用 `-m` 追加详细说明，同样使用中文。
+
 ## 启动开发
 
 ```bash
