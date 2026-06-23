@@ -80,9 +80,16 @@ python server.py        # 本地静态服务，端口 3000，禁用缓存
 
 ## AI/语音模块
 
-- **AI 推理**（`ai.js`）：通过硅基流动 API 调用 DeepSeek-V3，SSE 流式输出。会议阶段按钮触发，构建包含全部玩家状态、目击、路径、阵营统计的 prompt。API Key 存 localStorage key `goose_duck_ai_key`。
+- **AI 推理**（`ai.js`）：支持 DeepSeek 官方 API（默认 `deepseek-v4-pro`）和硅基流动两套后端，SSE 流式输出。会议阶段按钮触发，构建包含全部玩家状态、目击、路径、阵营统计的 prompt。API Key 存 localStorage key `goose_duck_ai_key`。
 - **阿里云 ASR**（`aliyun-asr.js`）：WebSocket 连接阿里云 Paraformer 实时语音识别，PCM 16kHz 采样。
 - 语音配置存 localStorage key `goose_duck_aliyun_config`，可切换 Chrome 内置或阿里云。按住空格开始录音，松开停止 — Phase1（明牌角色）和 Phase2（地图目击）各自独立实现空格监听。
+
+## 修改记录维护规范
+
+- **每次完成代码修改、Bug 修复或新功能开发后，必须主动将变更的总结说明保存到 `修改记录.md` 文件中。**
+- **每天的修改必须写在同一天的标题下，按序号排列。绝对禁止使用「后续修订」「补充修改」等子区块来分割当天的内容。**
+- **如果当前的修改覆盖、重构了当天的某个已有功能，必须直接修改、覆盖日志中原有的那条记录。绝对禁止保留重复的记录（即绝对不允许同时存在废弃方案和新方案的记录）。每天的日志必须是当前最新代码状态的精准反映，保持精简。**
+- 记录格式：按日期倒序（最新日期在最顶部），每条包含涉及的文件、变更摘要、技术要点。
 
 ## 仓库
 
@@ -100,7 +107,7 @@ python server.py        # 本地静态服务，端口 3000，禁用缓存
 
 - 竖屏有旋转提示蒙层（`#rotate-overlay`），强制横屏使用。
 - 手机横屏（`max-width:960px and orientation:landscape`）触发特殊布局：会议阶段使用 Tab 切换（玩家/阵营/分析），角色选择用全屏 Modal 而非内联下拉，备注用弹出 Modal 编辑。
-- 地图 `map-canvas` 为固定尺寸的 SVG + 绝对定位节点容器，通过 `map-wrapper` 的 `overflow: auto` 实现滚动。
+- 地图 `map-canvas` 为固定尺寸的 SVG + 绝对定位节点容器。桌面端通过右键拖动平移（CSS Transform），移动端通过 `overflow: scroll` 触摸滚动。
 
 ## 微信小程序 web-view 集成
 

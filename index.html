@@ -143,6 +143,18 @@
               <svg id="map-svg" class="map-svg"></svg>
               <div id="map-nodes" class="map-nodes"></div>
             </div>
+            <!-- 目击数字面板（悬浮于地图右上角） -->
+            <div id="sighting-popover" class="sighting-popover hidden">
+              <div class="popover-header">
+                <span id="popover-room-name"></span>
+                <button class="popover-close" id="popover-close">✕</button>
+              </div>
+              <div id="popover-number-grid" class="popover-number-grid"></div>
+              <div class="popover-actions">
+                <button class="btn btn-sm btn-secondary" id="popover-clear" type="button">清空</button>
+                <button class="btn btn-sm btn-primary" id="popover-save" type="button">保存</button>
+              </div>
+            </div>
           </div>
           <!-- 路径摘要 -->
           <div class="path-summary-box">
@@ -388,17 +400,6 @@
       <input id="mobile-role-search" type="text" placeholder="输入角色名搜索…" autocomplete="off" />
       <div id="mobile-role-list" class="mobile-role-list"></div>
     </div>
-  </div>
-
-  <!-- ===== 节点目击输入浮层 ===== -->
-  <div id="sighting-popover" class="sighting-popover hidden">
-    <div class="popover-header">
-      <span id="popover-room-name"></span>
-      <button class="popover-close" id="popover-close">✕</button>
-    </div>
-    <label class="popover-label">遇到的玩家编号（逗号分隔）</label>
-    <input type="text" id="popover-input" class="popover-input" placeholder="如：3, 5, 7" />
-    <button class="btn btn-sm btn-primary" id="popover-save">保存</button>
   </div>
 
   <!-- ===== 第三方库 ===== -->

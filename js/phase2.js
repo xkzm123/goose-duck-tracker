@@ -10,6 +10,11 @@ const Phase2 = (() => {
   let _voiceSilenceTimer = null;
   let _voiceBufferText = '';
 
+  // 地图平移状态（模块级，供 _initMapPan 和 _centerMap 共用）
+  let _panX = 0;
+  let _panY = 0;
+  let _mapInitialized = false;
+
   function init() {
     document.getElementById('btn-clear-path').addEventListener('click', () => {
       State.clearPath();
@@ -32,12 +37,20 @@ const Phase2 = (() => {
       App.switchPhase('meeting');
     });
 
-    // 浮层关闭
+    // 浮层关闭 & 保存
     document.getElementById('popover-close').addEventListener('click', _closePopover);
     document.getElementById('popover-save').addEventListener('click', _savePopover);
-    document.getElementById('popover-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') _savePopover();
-      if (e.key === 'Escape') _closePopover();
+    document.getElementById('popover-clear').addEventListener('click', () => {
+      document.querySelectorAll('#popover-number-grid .popover-num-btn.active')
+        .forEach(b => b.classList.remove('active'));
+    });
+
+    // Escape 关闭浮层
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const popover = document.getElementById('sighting-popover');
+        if (!popover.classList.contains('hidden')) _closePopover();
+      }
     });
 
     // 点击空白关闭浮层
@@ -293,6 +306,7 @@ const Phase2 = (() => {
     const mapDef = MAPS[config.map];
     document.getElementById('map-title').textContent = mapDef.name;
     _renderMap(mapDef);
+    if (!_mapInitialized) _centerMap();
     _renderSightingList();
     _renderHistoryList();
     _renderPathSummary();
@@ -441,25 +455,42 @@ const Phase2 = (() => {
     }
   }
 
-  // ── 地图右键拖动平移（CSS Transform 方案） ────────────────
-  // 不再依赖容器 overflow / scrollLeft，直接对 #map-canvas 应用
-  // translate() 变换，无需容器产生物理溢出即可拖动。
+  // ── 地图平移（CSS Transform 方案） ──────────────────────────
+  // 模块级 _panX/_panY 累积偏移，_applyPan() 负责渲染到 canvas。
+  // _centerMap() 在首次渲染时计算居中偏移量。
+
+  function _applyPan() {
+    const canvas = document.getElementById('map-canvas');
+    if (canvas) canvas.style.transform = `translate(${_panX}px, ${_panY}px)`;
+  }
+
+  function _centerMap() {
+    const wrapper = document.querySelector('.map-wrapper');
+    const canvas  = document.getElementById('map-canvas');
+    if (!wrapper || !canvas) return;
+    const wW = wrapper.clientWidth;
+    const wH = wrapper.clientHeight;
+    const cW = parseInt(canvas.style.width)  || 0;
+    const cH = parseInt(canvas.style.height) || 0;
+    _panX = (wW - cW) / 2;
+    _panY = (wH - cH) / 2;
+    _applyPan();
+    _mapInitialized = true;
+  }
 
   function _initMapPan() {
     const wrapper = document.querySelector('.map-wrapper');
     const canvas  = document.getElementById('map-canvas');
     if (!wrapper || !canvas) return;
 
-    let isDragging = false;  // 是否正在拖拽
-    let currentX   = 0;      // 累积 X 偏移 (px)
-    let currentY   = 0;      // 累积 Y 偏移 (px)
+    let isDragging = false;
 
     // ① 彻底屏蔽右键菜单
     wrapper.addEventListener('contextmenu', e => e.preventDefault());
 
     // ② 右键按下 → 开启拖拽
     wrapper.addEventListener('mousedown', e => {
-      if (e.button !== 2) return;           // 仅响应右键
+      if (e.button !== 2) return;
       e.preventDefault();
       isDragging = true;
       wrapper.classList.add('panning');
@@ -468,9 +499,9 @@ const Phase2 = (() => {
     // ③ 鼠标移动 → 累加位移并渲染
     document.addEventListener('mousemove', e => {
       if (!isDragging) return;
-      currentX += e.movementX;
-      currentY += e.movementY;
-      canvas.style.transform = `translate(${currentX}px, ${currentY}px)`;
+      _panX += e.movementX;
+      _panY += e.movementY;
+      _applyPan();
     });
 
     // ④ 松开 / 离开 → 结束拖拽
@@ -518,17 +549,30 @@ const Phase2 = (() => {
     const popover = document.getElementById('sighting-popover');
     document.getElementById('popover-room-name').textContent = node.label;
 
-    // 填入已有值
+    // 动态生成数字按钮 1 .. playerCount
+    const { playerCount } = State.get().config;
     const existing = State.get().currentSightings[node.id] || [];
-    document.getElementById('popover-input').value = existing.join(', ');
+    const grid = document.getElementById('popover-number-grid');
+    grid.innerHTML = '';
 
-    // 定位
-    const rect = anchorEl.getBoundingClientRect();
-    popover.style.left = Math.min(rect.right + 8, window.innerWidth - 260) + 'px';
-    popover.style.top  = Math.max(rect.top - 10, 10) + 'px';
+    for (let n = 1; n <= playerCount; n++) {
+      const btn = document.createElement('button');
+      btn.className = 'popover-num-btn';
+      btn.textContent = n;
+      btn.type = 'button';
+      // 玩家专属颜色（与地图圆点、连线颜色一致）
+      const pc = PLAYER_COLORS[n];
+      if (pc) btn.style.color = pc;
+      if (existing.includes(n)) btn.classList.add('active');
+
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+      });
+
+      grid.appendChild(btn);
+    }
 
     popover.classList.remove('hidden');
-    document.getElementById('popover-input').focus();
   }
 
   function _closePopover() {
@@ -538,10 +582,12 @@ const Phase2 = (() => {
 
   function _savePopover() {
     if (!_popoverTargetRoom) return;
-    const raw = document.getElementById('popover-input').value;
-    const nums = raw.split(/[,，\s]+/)
-      .map(s => parseInt(s.trim()))
-      .filter(n => !isNaN(n) && n > 0);
+    const nums = [];
+    document.querySelectorAll('#popover-number-grid .popover-num-btn.active').forEach(btn => {
+      const n = parseInt(btn.textContent);
+      if (!isNaN(n) && n > 0) nums.push(n);
+    });
+    nums.sort((a, b) => a - b);
     State.setSighting(_popoverTargetRoom, nums);
     _closePopover();
     render();
