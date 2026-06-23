@@ -441,37 +441,47 @@ const Phase2 = (() => {
     }
   }
 
-  // ── 地图右键拖动平移 ──────────────────────────────────────
+  // ── 地图右键拖动平移（CSS Transform 方案） ────────────────
+  // 不再依赖容器 overflow / scrollLeft，直接对 #map-canvas 应用
+  // translate() 变换，无需容器产生物理溢出即可拖动。
 
   function _initMapPan() {
     const wrapper = document.querySelector('.map-wrapper');
-    if (!wrapper) return;
-    let panning = false, startX, startY, scrollLeft, scrollTop;
+    const canvas  = document.getElementById('map-canvas');
+    if (!wrapper || !canvas) return;
 
+    let isDragging = false;  // 是否正在拖拽
+    let currentX   = 0;      // 累积 X 偏移 (px)
+    let currentY   = 0;      // 累积 Y 偏移 (px)
+
+    // ① 彻底屏蔽右键菜单
     wrapper.addEventListener('contextmenu', e => e.preventDefault());
 
+    // ② 右键按下 → 开启拖拽
     wrapper.addEventListener('mousedown', e => {
-      if (e.button !== 2) return;
+      if (e.button !== 2) return;           // 仅响应右键
       e.preventDefault();
-      panning = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      scrollLeft = wrapper.scrollLeft;
-      scrollTop = wrapper.scrollTop;
+      isDragging = true;
       wrapper.classList.add('panning');
     });
 
-    window.addEventListener('mousemove', e => {
-      if (!panning) return;
-      wrapper.scrollLeft = scrollLeft - (e.clientX - startX);
-      wrapper.scrollTop  = scrollTop  - (e.clientY - startY);
+    // ③ 鼠标移动 → 累加位移并渲染
+    document.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      currentX += e.movementX;
+      currentY += e.movementY;
+      canvas.style.transform = `translate(${currentX}px, ${currentY}px)`;
     });
 
-    window.addEventListener('mouseup', () => {
-      if (!panning) return;
-      panning = false;
+    // ④ 松开 / 离开 → 结束拖拽
+    const _endPan = () => {
+      if (!isDragging) return;
+      isDragging = false;
       wrapper.classList.remove('panning');
-    });
+    };
+
+    document.addEventListener('mouseup', _endPan);
+    wrapper.addEventListener('mouseleave', _endPan);
   }
 
   function _showToast(msg) {
@@ -537,48 +547,9 @@ const Phase2 = (() => {
     render();
   }
 
-  // ── 目击列表拖拽状态 ──────────────────────────────────────
+  // ── 目击列表 SortableJS 实例引用 ───────────────────────────
 
-  let _dragSrcIndex = null;
-
-  function _onDragStart(e) {
-    _dragSrcIndex = parseInt(this.dataset.index);
-    this.classList.add('sighting-dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.roomId);
-  }
-
-  function _onDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  }
-
-  function _onDragEnter(e) {
-    e.preventDefault();
-    this.classList.add('sighting-drag-over');
-  }
-
-  function _onDragLeave() {
-    this.classList.remove('sighting-drag-over');
-  }
-
-  function _onDrop(e) {
-    e.preventDefault();
-    this.classList.remove('sighting-drag-over');
-    const fromIndex = _dragSrcIndex;
-    const toIndex = parseInt(this.dataset.index);
-    if (fromIndex !== null && fromIndex !== toIndex && !isNaN(fromIndex) && !isNaN(toIndex)) {
-      State.reorderPath(fromIndex, toIndex);
-      render();
-    }
-    _dragSrcIndex = null;
-  }
-
-  function _onDragEnd() {
-    this.classList.remove('sighting-dragging');
-    document.querySelectorAll('.sighting-item').forEach(el => el.classList.remove('sighting-drag-over'));
-    _dragSrcIndex = null;
-  }
+  let _sortableInstance = null;
 
   // ── 右侧面板 ──────────────────────────────────────────────
 
@@ -586,6 +557,12 @@ const Phase2 = (() => {
     const { currentPath, currentSightings, config } = State.get();
     const mapDef = MAPS[config.map];
     const container = document.getElementById('sighting-list');
+
+    // 销毁旧 SortableJS 实例（DOM 即将重建）
+    if (_sortableInstance) {
+      _sortableInstance.destroy();
+      _sortableInstance = null;
+    }
 
     if (currentPath.length === 0) {
       container.innerHTML = '<p class="hint-text">点击地图节点后，可在此输入遇到的玩家编号</p>';
@@ -600,9 +577,7 @@ const Phase2 = (() => {
 
       const item = document.createElement('div');
       item.className = 'sighting-item';
-      item.draggable = true;
       item.dataset.roomId = roomId;
-      item.dataset.index = index;
 
       item.innerHTML =
         `<div class="sighting-item-row">
@@ -638,16 +613,28 @@ const Phase2 = (() => {
         if (el) _openPopover(node, el);
       });
 
-      // 拖拽排序
-      item.addEventListener('dragstart', _onDragStart);
-      item.addEventListener('dragover',  _onDragOver);
-      item.addEventListener('dragenter', _onDragEnter);
-      item.addEventListener('dragleave', _onDragLeave);
-      item.addEventListener('drop',      _onDrop);
-      item.addEventListener('dragend',   _onDragEnd);
-
       container.appendChild(item);
     });
+
+    // ── SortableJS 初始化：丝滑拖拽排序 ─────────────────────
+    if (typeof Sortable !== 'undefined' && currentPath.length > 1) {
+      _sortableInstance = Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sighting-ghost',
+        dragClass: 'sighting-drag',
+        chosenClass: 'sighting-chosen',
+        handle: '.sighting-item-row',  // 拖拽手柄：整行可拖
+        filter: '.sighting-action-btn',  // 防止点击按钮时误触发拖拽
+        onEnd(evt) {
+          const from = evt.oldIndex;
+          const to   = evt.newIndex;
+          if (from !== to && from >= 0 && to >= 0) {
+            State.reorderPath(from, to);
+            render();
+          }
+        }
+      });
+    }
   }
 
   function _renderHistoryList() {
