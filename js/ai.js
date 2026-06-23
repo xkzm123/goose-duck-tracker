@@ -4,10 +4,27 @@
 
 const AI = (() => {
 
-  const AI_KEY_STORAGE = 'goose_duck_ai_key';
+  const AI_KEY_STORAGE = 'goose_duck_ai_key';           // 硅基流动 Key（向后兼容）
+  const DEEPSEEK_KEY_STORAGE = 'goose_duck_deepseek_key'; // DeepSeek 官方 Key
   const ALIYUN_CONFIG_STORAGE = 'goose_duck_aliyun_config';
-  const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
-  const MODEL   = 'deepseek-ai/DeepSeek-V3';
+  const PROVIDER_STORAGE = 'goose_duck_ai_provider';       // 'siliconflow' | 'deepseek'
+
+  const PROVIDER_CONFIG = {
+    siliconflow: {
+      name: '硅基流动 (SiliconFlow)',
+      apiUrl: 'https://api.siliconflow.cn/v1/chat/completions',
+      model: 'deepseek-ai/DeepSeek-V3',
+      keyLabel: '硅基流动 API Key',
+      keyPlaceholder: 'sk-...',
+    },
+    deepseek: {
+      name: 'DeepSeek 官方',
+      apiUrl: 'https://api.deepseek.com/chat/completions',
+      model: 'deepseek-v4-pro',
+      keyLabel: 'DeepSeek API Key',
+      keyPlaceholder: 'sk-...',
+    },
+  };
 
   // 阿里云配置默认值
   const DEFAULT_ALIYUN = {
@@ -84,12 +101,29 @@ const AI = (() => {
 
   let _activeAbortController = null;
 
+  function getProvider() {
+    return localStorage.getItem(PROVIDER_STORAGE) || 'deepseek';
+  }
+
+  function saveProvider(provider) {
+    localStorage.setItem(PROVIDER_STORAGE, provider);
+  }
+
   function getApiKey() {
+    const provider = getProvider();
+    if (provider === 'deepseek') {
+      return localStorage.getItem(DEEPSEEK_KEY_STORAGE) || '';
+    }
     return localStorage.getItem(AI_KEY_STORAGE) || '';
   }
 
   function saveApiKey(key) {
-    localStorage.setItem(AI_KEY_STORAGE, key.trim());
+    const provider = getProvider();
+    if (provider === 'deepseek') {
+      localStorage.setItem(DEEPSEEK_KEY_STORAGE, key.trim());
+    } else {
+      localStorage.setItem(AI_KEY_STORAGE, key.trim());
+    }
   }
 
   function clearResult() {
@@ -227,6 +261,11 @@ const AI = (() => {
       onError('no_key');
       return;
     }
+
+    const provider = getProvider();
+    const providerCfg = PROVIDER_CONFIG[provider] || PROVIDER_CONFIG.deepseek;
+    const API_URL = providerCfg.apiUrl;
+    const MODEL = providerCfg.model;
 
     const userPrompt = buildUserPrompt();
 
@@ -479,6 +518,12 @@ const AI = (() => {
   function _openSettings() {
     const modal = document.getElementById('modal-ai-settings');
     const input = document.getElementById('ai-api-key-input');
+    const providerSelect = document.getElementById('ai-provider-select');
+
+    const provider = getProvider();
+    providerSelect.value = provider;
+    _updateProviderUI(provider);
+
     input.value = getApiKey();
     input.type  = 'password';
     document.getElementById('btn-ai-key-toggle').textContent = '显示';
@@ -490,10 +535,17 @@ const AI = (() => {
     document.getElementById('aliyun-ak-id').value = aliConfig.akId;
     document.getElementById('aliyun-ak-secret').value = aliConfig.akSecret;
     document.getElementById('aliyun-appkey').value = aliConfig.appKey;
-    
+
     _toggleAliyunFields(aliConfig.service);
 
     modal.classList.remove('hidden');
+  }
+
+  function _updateProviderUI(provider) {
+    const cfg = PROVIDER_CONFIG[provider] || PROVIDER_CONFIG.deepseek;
+    document.getElementById('ai-key-label').textContent = cfg.keyLabel;
+    document.getElementById('ai-api-key-input').placeholder = cfg.keyPlaceholder;
+    document.getElementById('ai-model-display').textContent = cfg.model;
   }
 
   function _toggleAliyunFields(service) {
@@ -518,8 +570,22 @@ const AI = (() => {
       _toggleAliyunFields(e.target.value);
     });
 
+    // 提供商切换：更新 UI 并加载对应 Key
+    document.getElementById('ai-provider-select').addEventListener('change', (e) => {
+      const newProvider = e.target.value;
+      _updateProviderUI(newProvider);
+      // 临时切换 provider 以读取对应 Key
+      const prevProvider = getProvider();
+      saveProvider(newProvider);
+      const key = getApiKey();
+      document.getElementById('ai-api-key-input').value = key;
+      saveProvider(prevProvider); // 恢复，等保存时再正式切换
+    });
+
     // 设置面板：保存
     document.getElementById('ai-settings-save').addEventListener('click', () => {
+      const provider = document.getElementById('ai-provider-select').value;
+      saveProvider(provider);
       const key = document.getElementById('ai-api-key-input').value.trim();
       saveApiKey(key);
 

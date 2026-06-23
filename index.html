@@ -59,6 +59,11 @@
               <span id="player-count-display" class="stepper-value">13</span>
               <button class="stepper-btn" id="player-inc">+</button>
             </div>
+            <div class="preset-row">
+              <button class="btn-preset" data-preset="8">8人场<span class="preset-detail">6鹅 2鸭</span></button>
+              <button class="btn-preset" data-preset="10">10人场<span class="preset-detail">6鹅 2鸭 2中立</span></button>
+              <button class="btn-preset" data-preset="13">13人场<span class="preset-detail">8鹅 3鸭 2中立</span></button>
+            </div>
           </div>
 
           <!-- 地图选择 -->
@@ -270,7 +275,14 @@
       <div class="settings-section">
         <h4>🤖 AI 推理设置</h4>
         <div class="ai-settings-field">
-          <label for="ai-api-key-input">硅基流动 API Key</label>
+          <label for="ai-provider-select">API 提供商</label>
+          <select id="ai-provider-select" class="settings-select">
+            <option value="siliconflow">硅基流动 (SiliconFlow)</option>
+            <option value="deepseek">DeepSeek 官方</option>
+          </select>
+        </div>
+        <div class="ai-settings-field">
+          <label for="ai-api-key-input" id="ai-key-label">API Key</label>
           <div class="input-with-btn">
             <input type="password" id="ai-api-key-input" placeholder="sk-..." autocomplete="off" />
             <button class="btn btn-sm btn-secondary" id="btn-ai-key-toggle" type="button">显示</button>
@@ -278,7 +290,7 @@
         </div>
         <div class="ai-settings-field">
           <label>推理模型</label>
-          <div class="ai-model-display">deepseek-ai/DeepSeek-V3</div>
+          <div class="ai-model-display" id="ai-model-display">deepseek-v4-pro</div>
         </div>
       </div>
 
