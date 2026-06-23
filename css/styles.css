@@ -177,6 +177,29 @@ body {
   background: var(--bg-surface); padding: 0 12px; line-height: 40px;
   border-left: 1px solid var(--border); border-right: 1px solid var(--border);
 }
+.preset-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.btn-preset {
+  flex: 1; min-width: 80px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 10px;
+  background: var(--bg-elevated); border: 1px solid var(--border-light);
+  border-radius: var(--radius-md); color: var(--text-primary);
+  font-size: 0.85rem; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: all var(--transition);
+}
+.btn-preset:hover {
+  background: var(--accent-blue-bg); border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+.btn-preset .preset-detail {
+  font-size: 0.68rem; font-weight: 400; color: var(--text-secondary);
+}
+.btn-preset:hover .preset-detail { color: var(--accent-blue); opacity: 0.8; }
+.init-left-locked .btn-preset {
+  pointer-events: none; opacity: 0.45;
+}
 .map-selector { display: flex; gap: 12px; }
 .map-btn {
   flex: 1; padding: 10px 16px;
@@ -383,7 +406,11 @@ body {
   flex: 1; position: relative; overflow: auto;
   background: radial-gradient(ellipse at center, #111827 0%, #0d1117 100%);
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
 }
+.map-wrapper.panning,
+.map-wrapper.panning .map-node,
+.map-wrapper.panning .map-svg { cursor: grabbing; }
 .map-theme-basement {
   background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0718 100%);
   --node-default: #2d1b4e; --node-border: #6b3fa0;
@@ -480,10 +507,37 @@ body {
 .sighting-list, .history-list { display: flex; flex-direction: column; gap: 8px; }
 .sighting-item {
   background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: var(--radius-md); padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;
+  border-radius: var(--radius-md); cursor: grab; transition: opacity 0.15s, border-color 0.15s;
 }
+.sighting-item:active { cursor: grabbing; }
+.sighting-item.sighting-dragging { opacity: 0.4; }
+.sighting-item.sighting-drag-over {
+  border-color: var(--accent-blue); border-style: dashed;
+  box-shadow: 0 0 8px rgba(88,166,255,0.3);
+}
+.sighting-item-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+}
+.sighting-seq {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent-blue); color: #0d1117; font-size: 0.72rem;
+  font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.sighting-info { flex: 1; min-width: 0; }
 .sighting-room { font-size: 0.82rem; font-weight: 600; color: var(--accent-blue); }
 .sighting-nums { font-size: 0.8rem; color: var(--text-secondary); }
+.sighting-actions {
+  display: flex; gap: 4px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s;
+}
+.sighting-item:hover .sighting-actions { opacity: 1; }
+.sighting-action-btn {
+  width: 24px; height: 24px; border-radius: var(--radius-sm); border: 1px solid transparent;
+  background: transparent; color: var(--text-secondary); font-size: 0.78rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); font-family: inherit; padding: 0; line-height: 1;
+}
+.sighting-modify-btn:hover { color: var(--accent-blue); background: var(--accent-blue-bg); border-color: var(--accent-blue); }
+.sighting-delete-btn:hover { color: var(--duck-color); background: var(--duck-bg); border-color: var(--duck-border); }
 .history-item {
   font-size: 0.82rem; color: var(--text-secondary); padding: 6px 8px;
   background: var(--bg-elevated); border-radius: var(--radius-sm); border-left: 2px solid var(--border-light);
@@ -1369,9 +1423,11 @@ body {
   .side-block:last-of-type { border-right: none; }
   .side-block h4   { font-size: 0.72rem; margin-bottom: 4px; }
   .hint-text       { font-size: 0.72rem; }
-  .sighting-item   { padding: 4px 7px; }
+  .sighting-item-row { padding: 4px 6px; }
   .sighting-room   { font-size: 0.72rem; }
   .sighting-nums   { font-size: 0.68rem; }
+  .sighting-seq    { width: 18px; height: 18px; font-size: 0.65rem; }
+  .sighting-action-btn { width: 20px; height: 20px; font-size: 0.7rem; }
   .history-item    { font-size: 0.72rem; padding: 3px 6px; }
   .game-actions    { padding: 6px 10px; flex-shrink: 0; align-self: flex-end; }
   .game-actions .btn { font-size: 0.82rem; padding: 5px 14px; }

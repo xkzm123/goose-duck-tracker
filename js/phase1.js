@@ -8,6 +8,7 @@ const Phase1 = (() => {
     _bindPlayerCount();
     _bindMapSelector();
     _bindFactionInputs();
+    _bindPresets();
     _renderOpenRoles();
     _renderMyRole();
     _bindStartGame();
@@ -106,6 +107,35 @@ const Phase1 = (() => {
     } else {
       err.classList.add('hidden');
     }
+  }
+
+  // ── 快捷场次配置 ──────────────────────────────────────────
+
+  const PRESET_CONFIGS = {
+    '8':  { playerCount: 8,  factions: { goose: 6, duck: 2, neutral: 0 } },
+    '10': { playerCount: 10, factions: { goose: 6, duck: 2, neutral: 2 } },
+    '13': { playerCount: 13, factions: { goose: 8, duck: 3, neutral: 2 } },
+  };
+
+  function _bindPresets() {
+    document.querySelectorAll('.btn-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cfg = PRESET_CONFIGS[btn.dataset.preset];
+        if (!cfg) return;
+
+        State.updateConfig('playerCount', cfg.playerCount);
+        State.updateConfig('factions', { ...cfg.factions });
+
+        // 同步 UI
+        document.getElementById('player-count-display').textContent = cfg.playerCount;
+        document.getElementById('faction-goose').value   = cfg.factions.goose;
+        document.getElementById('faction-duck').value    = cfg.factions.duck;
+        document.getElementById('faction-neutral').value = cfg.factions.neutral;
+        _updateFactionTotal();
+
+        if (typeof umami !== 'undefined') umami.track('preset_select', { preset: btn.dataset.preset });
+      });
+    });
   }
 
   function _renderOpenRoles() {
