@@ -18,6 +18,7 @@ const Phase2 = (() => {
 
     _bindVoiceSighting();
     _initToast();
+    _initMapPan();
 
     document.getElementById('btn-enter-meeting').addEventListener('click', () => {
       if (window.AI && typeof window.AI.clearResult === 'function') {
@@ -440,6 +441,39 @@ const Phase2 = (() => {
     }
   }
 
+  // ── 地图右键拖动平移 ──────────────────────────────────────
+
+  function _initMapPan() {
+    const wrapper = document.querySelector('.map-wrapper');
+    if (!wrapper) return;
+    let panning = false, startX, startY, scrollLeft, scrollTop;
+
+    wrapper.addEventListener('contextmenu', e => e.preventDefault());
+
+    wrapper.addEventListener('mousedown', e => {
+      if (e.button !== 2) return;
+      e.preventDefault();
+      panning = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      scrollLeft = wrapper.scrollLeft;
+      scrollTop = wrapper.scrollTop;
+      wrapper.classList.add('panning');
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!panning) return;
+      wrapper.scrollLeft = scrollLeft - (e.clientX - startX);
+      wrapper.scrollTop  = scrollTop  - (e.clientY - startY);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!panning) return;
+      panning = false;
+      wrapper.classList.remove('panning');
+    });
+  }
+
   function _showToast(msg) {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -503,6 +537,49 @@ const Phase2 = (() => {
     render();
   }
 
+  // ── 目击列表拖拽状态 ──────────────────────────────────────
+
+  let _dragSrcIndex = null;
+
+  function _onDragStart(e) {
+    _dragSrcIndex = parseInt(this.dataset.index);
+    this.classList.add('sighting-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.roomId);
+  }
+
+  function _onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  function _onDragEnter(e) {
+    e.preventDefault();
+    this.classList.add('sighting-drag-over');
+  }
+
+  function _onDragLeave() {
+    this.classList.remove('sighting-drag-over');
+  }
+
+  function _onDrop(e) {
+    e.preventDefault();
+    this.classList.remove('sighting-drag-over');
+    const fromIndex = _dragSrcIndex;
+    const toIndex = parseInt(this.dataset.index);
+    if (fromIndex !== null && fromIndex !== toIndex && !isNaN(fromIndex) && !isNaN(toIndex)) {
+      State.reorderPath(fromIndex, toIndex);
+      render();
+    }
+    _dragSrcIndex = null;
+  }
+
+  function _onDragEnd() {
+    this.classList.remove('sighting-dragging');
+    document.querySelectorAll('.sighting-item').forEach(el => el.classList.remove('sighting-drag-over'));
+    _dragSrcIndex = null;
+  }
+
   // ── 右侧面板 ──────────────────────────────────────────────
 
   function _renderSightingList() {
@@ -516,19 +593,59 @@ const Phase2 = (() => {
     }
 
     container.innerHTML = '';
-    currentPath.forEach(roomId => {
+    currentPath.forEach((roomId, index) => {
       const node = mapDef.nodes.find(n => n.id === roomId);
       const nums = currentSightings[roomId] || [];
+      const seq = index + 1;
+
       const item = document.createElement('div');
       item.className = 'sighting-item';
-      item.innerHTML = `
-        <div class="sighting-room">${node ? node.label : roomId}</div>
-        <div class="sighting-nums">${nums.length > 0 ? '遇到：' + nums.map(n => n + '号').join('、') : '（无目击）'}</div>
-      `;
-      item.addEventListener('click', () => {
+      item.draggable = true;
+      item.dataset.roomId = roomId;
+      item.dataset.index = index;
+
+      item.innerHTML =
+        `<div class="sighting-item-row">
+          <span class="sighting-seq">${seq}</span>
+          <div class="sighting-info">
+            <div class="sighting-room">${node ? node.label : roomId}</div>
+            <div class="sighting-nums">${nums.length > 0 ? '遇到：' + nums.map(n => n + '号').join('、') : '（无目击）'}</div>
+          </div>
+          <div class="sighting-actions">
+            <button class="sighting-action-btn sighting-modify-btn" title="修改目击">✎</button>
+            <button class="sighting-action-btn sighting-delete-btn" title="删除此条">✕</button>
+          </div>
+        </div>`;
+
+      // 修改按钮
+      item.querySelector('.sighting-modify-btn').addEventListener('click', e => {
+        e.stopPropagation();
         const el = document.querySelector(`.map-node[data-id="${roomId}"]`);
         if (el) _openPopover(node, el);
       });
+
+      // 删除按钮
+      item.querySelector('.sighting-delete-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        State.removeFromPath(roomId);
+        render();
+      });
+
+      // 点击条目主体打开浮层
+      item.addEventListener('click', e => {
+        if (e.target.closest('.sighting-action-btn')) return;
+        const el = document.querySelector(`.map-node[data-id="${roomId}"]`);
+        if (el) _openPopover(node, el);
+      });
+
+      // 拖拽排序
+      item.addEventListener('dragstart', _onDragStart);
+      item.addEventListener('dragover',  _onDragOver);
+      item.addEventListener('dragenter', _onDragEnter);
+      item.addEventListener('dragleave', _onDragLeave);
+      item.addEventListener('drop',      _onDrop);
+      item.addEventListener('dragend',   _onDragEnd);
+
       container.appendChild(item);
     });
   }

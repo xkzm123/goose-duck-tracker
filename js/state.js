@@ -132,6 +132,14 @@ const State = {
     saveState();
   },
 
+  reorderPath(fromIndex, toIndex) {
+    const arr = gameState.currentPath;
+    if (fromIndex < 0 || fromIndex >= arr.length || toIndex < 0 || toIndex >= arr.length) return;
+    const [item] = arr.splice(fromIndex, 1);
+    arr.splice(toIndex, 0, item);
+    saveState();
+  },
+
   // 目击记录
   setSighting(roomId, nums) {
     if (nums && nums.length > 0) {
